@@ -4,7 +4,7 @@
 > 硬件平台: STM32H7R7 (ART-Pi2开发板)
 > 操作系统: **RT-Thread 5.1.0**
 > 开发环境: Keil MDK-ARM / RT-Thread Studio
-> 项目时间: 2025年11月
+> 项目时间: 2025年1月
 
 ---
 
@@ -172,6 +172,8 @@ INIT_APP_EXPORT(sensor_threads_init);
 
 ## 🔌 硬件框架
 
+![3c3f1513c1eb85b39430a689c37ed056](./smart_helmet_rtthread_submission.assets/3c3f1513c1eb85b39430a689c37ed056.jpg
+
 ### 主控平台
 
 | 组件 | 型号/参数 | 说明 |
@@ -191,6 +193,10 @@ INIT_APP_EXPORT(sensor_threads_init);
 | ATGM336H | UART2 | PA2(TX), PA3(RX) | gps | GPS定位 |
 | ESP-01S | UART3 | PB10(TX), PB11(RX) | wifi | WiFi通信 |
 | LED | GPIO | PO5 | led | 状态指示 |
+
+### **硬件连接图**
+
+![3c3f1513c1eb85b39430a689c37ed056](./smart_helmet_rtthread_submission.assets/3c3f1513c1eb85b39430a689c37ed056-1764248217131-24.jpg)
 
 ---
 
@@ -279,10 +285,6 @@ RT-Thread调度器接管
    ▼
 系统正常运行(各线程并发执行)
 ```
-
-![ScreenShot_2025-11-27_144502_158](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_144502_158-1764233335561-2.png)
-
-![ScreenShot_2025-11-27_144523_438](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_144523_438.png)
 
 
 
@@ -397,14 +399,6 @@ static void mpu6050_thread_entry(void *parameter) {
 
 ### 控制台输出
 
-![ScreenShot_2025-11-27_150853_813](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150853_813.png)
-
-![ScreenShot_2025-11-27_150811_549](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150811_549.png)
-
-![ScreenShot_2025-11-27_150827_782](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150827_782.png)
-
-![ScreenShot_2025-11-27_150841_303](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150841_303.png)
-
 系统启动后的RT-Thread日志:
 
 ```
@@ -453,22 +447,6 @@ tidle0    31  ready   0x00000070 0x00000400    28%   0x0000000a 000
 
 #### 2. 查看传感器数据
 
-![ScreenShot_2025-11-27_150918_345](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150918_345-1764233499828-13.png)
-
-![ScreenShot_2025-11-27_150931_606](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150931_606-1764233507141-15.png)
-
-![ScreenShot_2025-11-27_150951_846](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_150951_846-1764233509801-17.png)
-
-![ScreenShot_2025-11-27_151012_413](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_151012_413-1764233514389-19.png)
-
-华为云IoT 物联网平台
-
-![ScreenShot_2025-11-27_151151_890](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_151151_890.png)
-
-![ScreenShot_2025-11-27_151205_302](./smart_helmet_rtthread_submission.assets/ScreenShot_2025-11-27_151205_302.png)
-
-
-
 ```
 msh />sensor_read
 
@@ -495,15 +473,31 @@ available: 602976 Bytes
 
 ### 实时数据演示
 
-> 由于硬件正在调试中,我们开发了完整的仿真演示系统
+> 由于硬件部分模块正在调试中,开发板接口资源有限,扩展板正在制作中,我们开发了完整的在线演示系统展示系统功能
 
-**演示文件位置**:
+## 🌐 在线演示
 
-- `F:\RT\console_output.html` - RT-Thread控制台输出模拟
-- `F:\RT\smart_helmet_demo.html` - 传感器数据动态演示
-- `F:\RT\huawei_iot_dashboard.html` - 华为云IoT数据展示
+项目已部署到GitHub Pages,可直接在线查看:
 
-**使用方法**: 双击HTML文件在浏览器中查看动态效果
+### 🏠 项目展示主页 (推荐)
+
+**完整的单页项目展示**: https://3080771737.github.io/smart-helmet-rtthread/project.html
+
+这是一个专业的响应式单页展示,包含:
+- ✅ 完整的功能介绍和核心特性
+- ✅ RT-Thread 7个线程的完整架构表格
+- ✅ 代码示例和语法高亮
+- ✅ 硬件框架和性能数据
+- ✅ 所有在线演示的链接入口
+- ✅ 平滑滚动动画和现代化设计
+
+### 📺 详细功能演示
+
+- **演示索引页**: https://3080771737.github.io/smart-helmet-rtthread/
+- **硬件连接示意图**: https://3080771737.github.io/smart-helmet-rtthread/hardware_connection_diagram.html
+- **RT-Thread控制台输出**: https://3080771737.github.io/smart-helmet-rtthread/console_output.html
+- **传感器数据动态演示**: https://3080771737.github.io/smart-helmet-rtthread/smart_helmet_demo.html
+- **华为云IoT平台**: https://3080771737.github.io/smart-helmet-rtthread/huawei_iot_dashboard.html
 
 ---
 
@@ -511,7 +505,7 @@ available: 602976 Bytes
 
 ### GitHub仓库
 ```
-https://github.com/YOUR_USERNAME/smart_helmet_rtthread
+https://github.com/3080771737/smart-helmet-rtthread
 ```
 
 ### 目录结构
@@ -610,7 +604,7 @@ Apache-2.0
 
 - **作者**: 陈思宇
 - **邮箱**: 3080771737@qq.com
-- **GitHub**: https://github.com/YOUR_USERNAME
+- **GitHub**:[3080771737/smart-helmet-rtthread: 基于RT-Thread的智能安全帽多传感器监测系统](https://github.com/3080771737/smart-helmet-rtthread)
 - **RT-Thread社区**: https://club.rt-thread.org
 
 ---
