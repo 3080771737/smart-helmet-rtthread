@@ -28,7 +28,18 @@
 
 🎉 **点击查看在线演示**: [https://3080771737.github.io/smart-helmet-rtthread/](https://3080771737.github.io/smart-helmet-rtthread/)
 
-### 演示页面
+### 🏠 项目展示主页 (推荐首选)
+
+**完整项目展示**: [https://3080771737.github.io/smart-helmet-rtthread/project.html](https://3080771737.github.io/smart-helmet-rtthread/project.html)
+
+这是一个专业的响应式单页展示,一个页面看完整个项目:
+- ✅ 项目介绍、核心特性、功能展示
+- ✅ RT-Thread 7个线程完整架构
+- ✅ 代码示例与语法高亮
+- ✅ 硬件框架与性能数据
+- ✅ 现代化动画效果
+
+### 📺 详细功能演示页面
 
 - 📺 [硬件连接示意图](https://3080771737.github.io/smart-helmet-rtthread/hardware_connection_diagram.html)
 - 🖥️ [RT-Thread控制台](https://3080771737.github.io/smart-helmet-rtthread/console_output.html)
