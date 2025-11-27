@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="基于RT-Thread 5.1.0和STM32H7R7的智能安全帽多传感器监测系统">
+    <meta name="keywords" content="RT-Thread,STM32H7R7,智能安全帽,IoT,物联网,传感器">
+    <meta name="author" content="陈思宇">
+    <title>智能安全帽监测系统 - RT-Thread项目</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #f8f9fa;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --shadow-hover: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        body {
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') bottom center/cover no-repeat;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.2s backwards;
+        }
+
+        .hero .badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease 0.4s backwards;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.6s backwards;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Section通用样式 */
+        section {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.2em;
+            margin-bottom: 60px;
+        }
+
+        /* 核心特性 */
+        .features {
+            background: var(--bg-light);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* 功能展示 */
+        .functions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .function-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .function-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .function-header {
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+        }
+
+        .function-header i {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .function-header h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .function-body {
+            padding: 30px;
+        }
+
+        .function-body ul {
+            list-style: none;
+        }
+
+        .function-body li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .function-body li:last-child {
+            border-bottom: none;
+        }
+
+        .function-body li i {
+            color: var(--primary-color);
+        }
+
+        /* RT-Thread架构 */
+        .architecture {
+            background: var(--bg-light);
+        }
+
+        .thread-table {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+
+        .thread-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .thread-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .thread-table td {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .thread-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .thread-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .priority-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .priority-medium {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .priority-low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        /* 代码展示 */
+        .code-showcase {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .code-header {
+            background: #282c34;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-dot:nth-child(1) { background: #ff5f56; }
+        .code-dot:nth-child(2) { background: #ffbd2e; }
+        .code-dot:nth-child(3) { background: #27c93f; }
+
+        .code-showcase pre {
+            margin: 0;
+            padding: 25px;
+            background: #282c34;
+            overflow-x: auto;
+        }
+
+        .code-showcase code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* 硬件框架 */
+        .hardware-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .hardware-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .hardware-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .hardware-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hardware-specs {
+            list-style: none;
+        }
+
+        .hardware-specs li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hardware-specs li:last-child {
+            border-bottom: none;
+        }
+
+        .hardware-specs .label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .hardware-specs .value {
+            color: var(--text-light);
+        }
+
+        /* 在线演示 */
+        .demos {
+            background: var(--bg-light);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+
+        .demo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .demo-thumbnail {
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            color: white;
+        }
+
+        .demo-info {
+            padding: 25px;
+        }
+
+        .demo-info h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .demo-info p {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .demo-link {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* GitHub部分 */
+        .github-section {
+            background: var(--text-dark);
+            color: white;
+            text-align: center;
+        }
+
+        .github-section .section-title {
+            color: white;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: white;
+        }
+
+        .github-stats {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-color), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 60px 20px 30px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .copyright {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            opacity: 0.7;
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2em;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .features-grid,
+            .functions-grid,
+            .hardware-grid,
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .github-stats {
+                gap: 30px;
+            }
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-hard-hat"></i>
+                智能安全帽
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">特性</a></li>
+                <li><a href="#functions">功能</a></li>
+                <li><a href="#architecture">架构</a></li>
+                <li><a href="#demos">演示</a></li>
+                <li><a href="#github">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🛡️ 智能安全帽监测系统</h1>
+            <p class="subtitle">基于RT-Thread 5.1.0和STM32H7R7的多传感器监测系统</p>
+
+            <div class="badges">
+                <span class="badge">RT-Thread 5.1.0</span>
+                <span class="badge">STM32H7R7 @ 600MHz</span>
+                <span class="badge">7个独立线程</span>
+                <span class="badge">IoT云端接入</span>
+            </div>
+
+            <div class="hero-buttons">
+                <a href="https://github.com/3080771737/smart-helmet-rtthread" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> GitHub仓库
+                </a>
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-play"></i> 在线演示
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心特性 -->
+    <section id="features" class="features">
+        <h2 class="section-title">💡 核心特性</h2>
+        <p class="section-subtitle">基于RT-Thread RTOS的专业级解决方案</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-microchip"></i></div>
+                <h3>RT-Thread RTOS</h3>
+                <p>基于RT-Thread 5.1.0实时操作系统,抢占式多任务调度,响应延迟<1ms</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-project-diagram"></i></div>
+                <h3>7个独立线程</h3>
+                <p>多传感器任务完全并行执行,优先级合理分配(15-20),互斥锁保护共享数据</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                <h3>线程同步机制</h3>
+                <p>使用rt_mutex互斥锁保护共享数据,确保多线程环境下的数据安全访问</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-terminal"></i></div>
+                <h3>MSH命令行</h3>
+                <p>支持MSH命令行交互,实时查看传感器数据、线程状态和内存使用情况</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                <h3>高性能处理</h3>
+                <p>STM32H7R7主频600MHz,Cortex-M7内核,640KB RAM,线程切换时间<1us</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <h3>云端接入</h3>
+                <p>WiFi+MQTT协议实时上报华为云IoT平台,1秒周期上报所有传感器数据</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能展示 -->
+    <section id="functions">
+        <h2 class="section-title">✨ 功能展示</h2>
+        <p class="section-subtitle">全方位实时监测,守护作业安全</p>
+
+        <div class="functions-grid">
+            <div class="function-card">
+                <div class="function-header">
+                    <i class="fas fa-heartbeat"></i>
+                    <h3>生理健康监测</h3>
+                </div>
+                <div class="function-body">
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> MAX30102心率监测 (BPM)</li>
+                        <li><i class="fas fa-check-circle"></i> 血氧饱和度监测 (SpO2%)</li>
+                        <li><i class="fas fa-check-circle"></i> 异常告警自动记录</li>
+                        <li><i class="fas fa-check-circle"></i> 滑动窗口平均滤波</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-header">
+                    <i class="fas fa-cloud-sun"></i>
+                    <h3>环境监测</h3>
+                </div>
+                <div class="function-body">
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> DHT11温湿度检测</li>
+                        <li><i class="fas fa-check-circle"></i> MQ2可燃气体检测</li>
+                        <li><i class="fas fa-check-circle"></i> 气体浓度超100ppm报警</li>
+                        <li><i class="fas fa-check-circle"></i> 多次采样平均提高精度</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-header">
+                    <i class="fas fa-compass"></i>
+                    <h3>位置与姿态监测</h3>
+                </div>
+                <div class="function-body">
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> ATGM336H GPS定位</li>
+                        <li><i class="fas fa-check-circle"></i> MPU6050六轴姿态解算</li>
+                        <li><i class="fas fa-check-circle"></i> 跌倒检测 (AVM+GVM算法)</li>
+                        <li><i class="fas fa-check-circle"></i> 碰撞检测 (突发加速度)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-header">
+                    <i class="fas fa-wifi"></i>
+                    <h3>无线通信</h3>
+                </div>
+                <div class="function-body">
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> ESP-01S WiFi连接</li>
+                        <li><i class="fas fa-check-circle"></i> MQTT协议数据上报</li>
+                        <li><i class="fas fa-check-circle"></i> 华为云IoT平台接入</li>
+                        <li><i class="fas fa-check-circle"></i> 1秒周期实时上报</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RT-Thread架构 -->
+    <section id="architecture" class="architecture">
+        <h2 class="section-title">🔧 RT-Thread线程架构</h2>
+        <p class="section-subtitle">7个独立线程并发执行,优先级抢占式调度</p>
+
+        <div class="thread-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>线程名</th>
+                        <th>优先级</th>
+                        <th>栈大小</th>
+                        <th>周期</th>
+                        <th>功能描述</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>mpu6050</strong></td>
+                        <td><span class="priority-badge priority-high">15 (高)</span></td>
+                        <td>1024B</td>
+                        <td>100ms</td>
+                        <td>MPU6050姿态传感器,跌倒/碰撞检测</td>
+                    </tr>
+                    <tr>
+                        <td><strong>max30102</strong></td>
+                        <td><span class="priority-badge priority-high">16 (高)</span></td>
+                        <td>1024B</td>
+                        <td>200ms</td>
+                        <td>MAX30102心率血氧传感器</td>
+                    </tr>
+                    <tr>
+                        <td><strong>dht11</strong></td>
+                        <td><span class="priority-badge priority-medium">17 (中)</span></td>
+                        <td>512B</td>
+                        <td>1000ms</td>
+                        <td>DHT11温湿度传感器</td>
+                    </tr>
+                    <tr>
+                        <td><strong>mq2</strong></td>
+                        <td><span class="priority-badge priority-medium">17 (中)</span></td>
+                        <td>512B</td>
+                        <td>100ms</td>
+                        <td>MQ2气体浓度传感器</td>
+                    </tr>
+                    <tr>
+                        <td><strong>gps</strong></td>
+                        <td><span class="priority-badge priority-medium">18 (中)</span></td>
+                        <td>1024B</td>
+                        <td>1000ms</td>
+                        <td>ATGM336H GPS定位模块</td>
+                    </tr>
+                    <tr>
+                        <td><strong>wifi</strong></td>
+                        <td><span class="priority-badge priority-low">19 (低)</span></td>
+                        <td>2048B</td>
+                        <td>1000ms</td>
+                        <td>ESP-01S WiFi数据上报</td>
+                    </tr>
+                    <tr>
+                        <td><strong>led</strong></td>
+                        <td><span class="priority-badge priority-low">20 (低)</span></td>
+                        <td>256B</td>
+                        <td>500ms</td>
+                        <td>LED状态指示灯</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- RT-Thread代码示例 -->
+        <h3 style="text-align: center; margin: 60px 0 30px; font-size: 1.8em;">RT-Thread API使用示例</h3>
+
+        <div class="code-showcase">
+            <div class="code-header">
+                <div class="code-dots">
+                    <div class="code-dot"></div>
+                    <div class="code-dot"></div>
+                    <div class="code-dot"></div>
+                </div>
+                <span>main.c</span>
+            </div>
+            <pre><code class="language-c">/* RT-Thread线程创建 */
+mpu6050_thread = rt_thread_create("mpu6050",
+                                  mpu6050_thread_entry,
+                                  RT_NULL,
+                                  1024,    /* 栈大小 */
+                                  15,      /* 优先级 */
+                                  10);     /* 时间片 */
+rt_thread_startup(mpu6050_thread);
+
+/* 互斥锁同步 */
+sensor_mutex = rt_mutex_create("sen_lock", RT_IPC_FLAG_PRIO);
+rt_mutex_take(sensor_mutex, RT_WAITING_FOREVER);
+g_sensor_data.heart_rate = 72;  /* 安全访问共享数据 */
+rt_mutex_release(sensor_mutex);
+
+/* MSH命令行 */
+static int sensor_read(int argc, char **argv) {
+    rt_kprintf("心率: %d bpm\\n", g_sensor_data.heart_rate);
+    return 0;
+}
+MSH_CMD_EXPORT(sensor_read, Read all sensor data);
+
+/* 自动初始化 */
+INIT_APP_EXPORT(sensor_threads_init);</code></pre>
+        </div>
+    </section>
+
+    <!-- 硬件框架 -->
+    <section id="hardware">
+        <h2 class="section-title">🔌 硬件框架</h2>
+        <p class="section-subtitle">STM32H7R7 + 7大传感器模块</p>
+
+        <div class="hardware-grid">
+            <div class="hardware-card">
+                <h3><i class="fas fa-microchip"></i> 主控平台</h3>
+                <ul class="hardware-specs">
+                    <li>
+                        <span class="label">主控MCU</span>
+                        <span class="value">STM32H7R7VIT6</span>
+                    </li>
+                    <li>
+                        <span class="label">内核</span>
+                        <span class="value">Cortex-M7 @ 600MHz</span>
+                    </li>
+                    <li>
+                        <span class="label">Flash</span>
+                        <span class="value">2MB + 64MB外部</span>
+                    </li>
+                    <li>
+                        <span class="label">RAM</span>
+                        <span class="value">640KB</span>
+                    </li>
+                    <li>
+                        <span class="label">开发板</span>
+                        <span class="value">ART-Pi2 (正点原子)</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="hardware-card">
+                <h3><i class="fas fa-plug"></i> 传感器模块</h3>
+                <ul class="hardware-specs">
+                    <li>
+                        <span class="label">MPU6050</span>
+                        <span class="value">I2C1 (PB6/PB7)</span>
+                    </li>
+                    <li>
+                        <span class="label">MAX30102</span>
+                        <span class="value">I2C2 (PF1/PF0)</span>
+                    </li>
+                    <li>
+                        <span class="label">MQ2</span>
+                        <span class="value">ADC1 (PA0)</span>
+                    </li>
+                    <li>
+                        <span class="label">DHT11</span>
+                        <span class="value">GPIO (PA8)</span>
+                    </li>
+                    <li>
+                        <span class="label">ATGM336H</span>
+                        <span class="value">UART2 (PA2/PA3)</span>
+                    </li>
+                    <li>
+                        <span class="label">ESP-01S</span>
+                        <span class="value">UART3 (PB10/PB11)</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="hardware-card">
+                <h3><i class="fas fa-chart-line"></i> 性能数据</h3>
+                <ul class="hardware-specs">
+                    <li>
+                        <span class="label">线程数量</span>
+                        <span class="value">7个</span>
+                    </li>
+                    <li>
+                        <span class="label">内存使用</span>
+                        <span class="value">~52KB / 640KB</span>
+                    </li>
+                    <li>
+                        <span class="label">线程切换</span>
+                        <span class="value">&lt;1us</span>
+                    </li>
+                    <li>
+                        <span class="label">中断响应</span>
+                        <span class="value">&lt;10us</span>
+                    </li>
+                    <li>
+                        <span class="label">任务延迟</span>
+                        <span class="value">&lt;1ms</span>
+                    </li>
+                    <li>
+                        <span class="label">上报频率</span>
+                        <span class="value">1Hz</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="documentation/HARDWARE_CONNECTION_TABLE.md" class="btn btn-primary">
+                <i class="fas fa-book"></i> 详细硬件连接表
+            </a>
+        </div>
+    </section>
+
+    <!-- 在线演示 -->
+    <section id="demos" class="demos">
+        <h2 class="section-title">🎬 在线演示</h2>
+        <p class="section-subtitle">实时查看系统运行效果</p>
+
+        <div class="demo-grid">
+            <a href="hardware_connection_diagram.html" class="demo-card" target="_blank">
+                <div class="demo-thumbnail">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div class="demo-info">
+                    <h3>硬件连接示意图</h3>
+                    <p>SVG矢量图展示STM32与传感器的完整接线关系</p>
+                    <span class="demo-link">
+                        查看演示 <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <a href="console_output.html" class="demo-card" target="_blank">
+                <div class="demo-thumbnail">
+                    <i class="fas fa-terminal"></i>
+                </div>
+                <div class="demo-info">
+                    <h3>RT-Thread控制台</h3>
+                    <p>模拟RT-Thread启动过程,7个线程启动日志和MSH命令</p>
+                    <span class="demo-link">
+                        查看演示 <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <a href="smart_helmet_demo.html" class="demo-card" target="_blank">
+                <div class="demo-thumbnail">
+                    <i class="fas fa-chart-area"></i>
+                </div>
+                <div class="demo-info">
+                    <h3>传感器数据仪表盘</h3>
+                    <p>实时展示8个传感器的动态数据,包含图表和波形</p>
+                    <span class="demo-link">
+                        查看演示 <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <a href="huawei_iot_dashboard.html" class="demo-card" target="_blank">
+                <div class="demo-thumbnail">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <div class="demo-info">
+                    <h3>华为云IoT平台</h3>
+                    <p>模拟设备通过MQTT上报数据到华为云的效果</p>
+                    <span class="demo-link">
+                        查看演示 <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- GitHub部分 -->
+    <section id="github" class="github-section">
+        <h2 class="section-title">📂 开源代码</h2>
+        <p class="section-subtitle" style="color: rgba(255,255,255,0.8);">
+            完整的RT-Thread项目代码,欢迎Star和Fork
+        </p>
+
+        <div class="github-stats">
+            <div class="stat">
+                <div class="stat-number">7</div>
+                <div class="stat-label">RT-Thread线程</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">8</div>
+                <div class="stat-label">传感器模块</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">600</div>
+                <div class="stat-label">MHz主频</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">1</div>
+                <div class="stat-label">ms任务延迟</div>
+            </div>
+        </div>
+
+        <div class="hero-buttons">
+            <a href="https://github.com/3080771737/smart-helmet-rtthread" class="btn btn-primary" target="_blank">
+                <i class="fab fa-github"></i> 访问GitHub仓库
+            </a>
+            <a href="https://github.com/3080771737/smart-helmet-rtthread/archive/refs/heads/main.zip" class="btn btn-secondary">
+                <i class="fas fa-download"></i> 下载源码
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/3080771737/smart-helmet-rtthread" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://club.rt-thread.org" target="_blank">
+                    <i class="fas fa-users"></i> RT-Thread社区
+                </a>
+                <a href="documentation/smart_helmet_rtthread_submission.md">
+                    <i class="fas fa-file-alt"></i> 完整文档
+                </a>
+                <a href="documentation/HARDWARE_CONNECTION_TABLE.md">
+                    <i class="fas fa-book"></i> 硬件连接表
+                </a>
+            </div>
+
+            <div class="copyright">
+                <p>© 2025 智能安全帽监测系统 | 基于RT-Thread 5.1.0</p>
+                <p>作者: 陈思宇 | License: Apache-2.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <div class="back-to-top" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script>
+        // 代码高亮
+        hljs.highlightAll();
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // 返回顶部按钮
+            const backToTop = document.querySelector('.back-to-top');
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 返回顶部
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease';
+                }
+            });
+        }, observerOptions);
+
+        // 观察所有section
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+
+</body>
+</html>
