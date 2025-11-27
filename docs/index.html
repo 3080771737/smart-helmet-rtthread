@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能安全帽监测系统 - 在线演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 标题部分 */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 演示卡片网格 */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1s ease;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .card-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            color: white;
+        }
+
+        .card-content {
+            padding: 30px;
+        }
+
+        .card-content h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .card-content p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .demo-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .demo-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 信息部分 */
+        .info-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .info-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+            color: #34495e;
+            line-height: 1.8;
+        }
+
+        .info-section li:last-child {
+            border-bottom: none;
+        }
+
+        .info-section li::before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* 链接部分 */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .link-btn {
+            background: white;
+            color: #667eea;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .link-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            opacity: 0.9;
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header .subtitle {
+                font-size: 1em;
+            }
+
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 标题部分 -->
+        <div class="header">
+            <h1>🛡️ 智能安全帽监测系统</h1>
+            <p class="subtitle">基于RT-Thread 5.1.0和STM32H7R7的多传感器监测系统</p>
+            <div class="badges">
+                <span class="badge">RT-Thread 5.1.0</span>
+                <span class="badge">STM32H7R7</span>
+                <span class="badge">7个独立线程</span>
+                <span class="badge">IoT云端接入</span>
+            </div>
+        </div>
+
+        <!-- 演示卡片 -->
+        <div class="demo-grid">
+            <!-- 硬件连接图 -->
+            <div class="demo-card">
+                <div class="card-icon">🔌</div>
+                <div class="card-content">
+                    <h3>硬件连接示意图</h3>
+                    <p>查看STM32H7R7与传感器模块的完整接线关系，包括I2C、UART、ADC、GPIO等接口的引脚连接。</p>
+                    <a href="hardware_connection_diagram.html" class="demo-btn">查看演示 →</a>
+                </div>
+            </div>
+
+            <!-- RT-Thread控制台 -->
+            <div class="demo-card">
+                <div class="card-icon">🖥️</div>
+                <div class="card-content">
+                    <h3>RT-Thread控制台</h3>
+                    <p>模拟RT-Thread系统启动过程，展示7个线程的启动日志、MSH命令行交互和系统运行状态。</p>
+                    <a href="console_output.html" class="demo-btn">查看演示 →</a>
+                </div>
+            </div>
+
+            <!-- 传感器数据 -->
+            <div class="demo-card">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <h3>传感器数据仪表盘</h3>
+                    <p>实时展示MPU6050姿态、MAX30102心率血氧、DHT11温湿度、MQ2气体浓度等8个传感器的动态数据。</p>
+                    <a href="smart_helmet_demo.html" class="demo-btn">查看演示 →</a>
+                </div>
+            </div>
+
+            <!-- 华为云IoT -->
+            <div class="demo-card">
+                <div class="card-icon">☁️</div>
+                <div class="card-content">
+                    <h3>华为云IoT平台</h3>
+                    <p>模拟设备通过MQTT协议上报数据到华为云IoT平台，展示设备状态、数据流和消息日志。</p>
+                    <a href="huawei_iot_dashboard.html" class="demo-btn">查看演示 →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 项目信息 -->
+        <div class="info-section">
+            <h2>🎯 项目特性</h2>
+            <ul>
+                <li><strong>操作系统</strong>: RT-Thread 5.1.0实时操作系统，优先级抢占式调度</li>
+                <li><strong>硬件平台</strong>: STM32H7R7VIT6 (Cortex-M7 @ 600MHz, ART-Pi2开发板)</li>
+                <li><strong>多线程架构</strong>: 7个独立线程并发执行，完全利用RT-Thread内核能力</li>
+                <li><strong>同步机制</strong>: 使用rt_mutex互斥锁保护共享数据，确保线程安全</li>
+                <li><strong>传感器集成</strong>: MPU6050姿态、MAX30102心率血氧、DHT11温湿度、MQ2气体、GPS定位</li>
+                <li><strong>无线通信</strong>: ESP-01S WiFi模块，MQTT协议上报华为云IoT平台</li>
+                <li><strong>安全监测</strong>: 跌倒检测、碰撞检测、心率异常、气体报警等功能</li>
+                <li><strong>命令行交互</strong>: 提供MSH命令实时查看传感器数据</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h2>🧵 RT-Thread线程列表</h2>
+            <ul>
+                <li><strong>mpu6050线程</strong> (优先级15, 100ms): MPU6050六轴传感器，姿态解算、跌倒/碰撞检测</li>
+                <li><strong>max30102线程</strong> (优先级16, 200ms): MAX30102心率血氧传感器，PPG信号处理</li>
+                <li><strong>dht11线程</strong> (优先级17, 1000ms): DHT11温湿度传感器，环境监测</li>
+                <li><strong>mq2线程</strong> (优先级17, 100ms): MQ2气体传感器，可燃气体浓度检测</li>
+                <li><strong>gps线程</strong> (优先级18, 1000ms): ATGM336H GPS模块，定位信息获取</li>
+                <li><strong>wifi线程</strong> (优先级19, 1000ms): ESP-01S WiFi模块，数据上报华为云</li>
+                <li><strong>led线程</strong> (优先级20, 500ms): LED状态指示灯，系统运行提示</li>
+            </ul>
+        </div>
+
+        <!-- 链接 -->
+        <div class="links">
+            <a href="https://github.com/YOUR_USERNAME/smart-helmet-rtthread" class="link-btn" target="_blank">
+                📂 GitHub源码仓库
+            </a>
+            <a href="https://club.rt-thread.org" class="link-btn" target="_blank">
+                🌐 RT-Thread社区
+            </a>
+            <a href="documentation/smart_helmet_rtthread_submission.md" class="link-btn" target="_blank">
+                📄 完整文档
+            </a>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>基于RT-Thread 5.1.0 | STM32H7R7 @ 600MHz | Apache-2.0 License</p>
+            <p>Made with ❤️ by [您的名字]</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                ⭐ 如果这个项目对您有帮助，请在GitHub上给个Star!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 添加卡片入场动画的延迟效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.demo-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>

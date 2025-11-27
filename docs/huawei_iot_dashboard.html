@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华为云IoT平台 - 数据上报演示</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 3px solid #FF6A00;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .device-panel {
+            background: white;
+            padding: 25px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .device-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .status-online {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #52c41a;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .data-table th {
+            background: #fafafa;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .data-table tr:hover {
+            background: #fafafa;
+        }
+        .value-normal { color: #52c41a; font-weight: bold; }
+        .value-warning { color: #faad14; font-weight: bold; }
+        .value-danger { color: #f5222d; font-weight: bold; }
+        .chart-container {
+            background: white;
+            padding: 25px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .mini-chart {
+            width: 100%;
+            height: 60px;
+        }
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-success {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+        .badge-warning {
+            background: #fffbe6;
+            color: #faad14;
+            border: 1px solid #ffe58f;
+        }
+        .badge-error {
+            background: #fff1f0;
+            color: #f5222d;
+            border: 1px solid #ffccc7;
+        }
+        .message-log {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        .log-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-left: 3px solid #52c41a;
+            border-radius: 3px;
+        }
+        .log-error {
+            border-left-color: #f5222d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 100 100">
+                    <rect width="100" height="100" rx="15" fill="#FF6A00"/>
+                    <text x="50" y="70" text-anchor="middle" fill="white" font-size="60" font-weight="bold">H</text>
+                </svg>
+                <div>
+                    <div class="logo-text">华为云 IoT 物联网平台</div>
+                    <div style="font-size: 12px; color: #666;">设备接入 / 数据管理 / 规则引擎</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设备信息面板 -->
+        <div class="device-panel">
+            <div class="panel-title">📱 设备详情 - 智能安全帽#001</div>
+            <div class="device-info">
+                <div class="info-item">
+                    <div class="info-label">设备ID</div>
+                    <div class="info-value">SmartHelmet_H7R7_001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">产品名称</div>
+                    <div class="info-value">智能安全帽监测系统</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">设备状态</div>
+                    <div class="info-value">
+                        <span class="status-online"></span>在线
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">最后上报时间</div>
+                    <div class="info-value timestamp" id="lastUpdate">2025-01-15 14:32:45</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">今日消息数</div>
+                    <div class="info-value">24,576 条</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">设备位置</div>
+                    <div class="info-value">湖北省武汉市</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实时数据监控 -->
+        <div class="device-panel">
+            <div class="panel-title">📊 实时数据监控</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>属性名称</th>
+                        <th>当前值</th>
+                        <th>单位</th>
+                        <th>状态</th>
+                        <th>更新时间</th>
+                        <th>趋势</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>❤️ 心率</td>
+                        <td class="value-normal">72</td>
+                        <td>BPM</td>
+                        <td><span class="badge badge-success">正常</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td><canvas class="mini-chart" id="hrChart"></canvas></td>
+                    </tr>
+                    <tr>
+                        <td>💉 血氧饱和度</td>
+                        <td class="value-normal">98</td>
+                        <td>%</td>
+                        <td><span class="badge badge-success">正常</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td><canvas class="mini-chart" id="spo2Chart"></canvas></td>
+                    </tr>
+                    <tr>
+                        <td>🌡️ 环境温度</td>
+                        <td class="value-normal">25.0</td>
+                        <td>°C</td>
+                        <td><span class="badge badge-success">适宜</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td><canvas class="mini-chart" id="tempChart"></canvas></td>
+                    </tr>
+                    <tr>
+                        <td>💧 环境湿度</td>
+                        <td class="value-normal">55</td>
+                        <td>%</td>
+                        <td><span class="badge badge-success">正常</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td><canvas class="mini-chart" id="humiChart"></canvas></td>
+                    </tr>
+                    <tr>
+                        <td>💨 气体浓度</td>
+                        <td class="value-normal">45.2</td>
+                        <td>ppm</td>
+                        <td><span class="badge badge-success">安全</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td><canvas class="mini-chart" id="gasChart"></canvas></td>
+                    </tr>
+                    <tr>
+                        <td>📍 经度</td>
+                        <td class="value-normal">114.3579</td>
+                        <td>°</td>
+                        <td><span class="badge badge-success">已定位</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>📍 纬度</td>
+                        <td class="value-normal">30.5447</td>
+                        <td>°</td>
+                        <td><span class="badge badge-success">已定位</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>⚠️ 跌倒标志</td>
+                        <td class="value-normal">0</td>
+                        <td>-</td>
+                        <td><span class="badge badge-success">正常</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>💥 碰撞标志</td>
+                        <td class="value-normal">0</td>
+                        <td>-</td>
+                        <td><span class="badge badge-success">正常</span></td>
+                        <td class="timestamp">14:32:45</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 消息上报记录 -->
+        <div class="device-panel">
+            <div class="panel-title">📨 消息上报记录</div>
+            <div class="message-log">
+                <div class="log-item">
+                    <strong>[14:32:45]</strong> Topic: $oc/devices/SmartHelmet_H7R7_001/sys/properties/report<br>
+                    Payload: {"services":[{"service_id":"BasicData","properties":{"spO2":98,"density":45.2,"heart_rate":72,"fall_flag":0,"collision_flag":0}}]}
+                </div>
+                <div class="log-item">
+                    <strong>[14:32:44]</strong> Topic: $oc/devices/SmartHelmet_H7R7_001/sys/properties/report<br>
+                    Payload: {"services":[{"service_id":"BasicData","properties":{"longitude":114.36,"latitude":30.54,"temperature":25,"humidity":55}}]}
+                </div>
+                <div class="log-item">
+                    <strong>[14:32:43]</strong> Topic: $oc/devices/SmartHelmet_H7R7_001/sys/properties/report<br>
+                    Payload: {"services":[{"service_id":"BasicData","properties":{"spO2":97,"density":44.8,"heart_rate":73,"fall_flag":0,"collision_flag":0}}]}
+                </div>
+                <div class="log-item log-error">
+                    <strong>[14:25:12]</strong> ⚠️ 报警消息<br>
+                    Topic: $oc/devices/SmartHelmet_H7R7_001/sys/events/report<br>
+                    Payload: {"services":[{"service_id":"Alert","event_type":"fall_detected","paras":{"avm":32456,"gvm":12345,"location":"114.3580,30.5448","timestamp":"2025-01-15T14:25:12Z"}}]}
+                </div>
+                <div class="log-item">
+                    <strong>[14:15:30]</strong> Topic: $oc/devices/SmartHelmet_H7R7_001/sys/properties/report<br>
+                    Payload: {"services":[{"service_id":"BasicData","properties":{"spO2":98,"density":43.5,"heart_rate":71,"fall_flag":0,"collision_flag":0}}]}
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="device-panel">
+            <div class="panel-title">📈 数据统计 (过去24小时)</div>
+            <div class="device-info">
+                <div class="info-item">
+                    <div class="info-label">总消息数</div>
+                    <div class="info-value">24,576</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">成功上报</div>
+                    <div class="info-value value-normal">24,572</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">失败次数</div>
+                    <div class="info-value value-warning">4</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">报警事件</div>
+                    <div class="info-value value-danger">3</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">平均心率</div>
+                    <div class="info-value">73.2 BPM</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">平均血氧</div>
+                    <div class="info-value">97.8 %</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 绘制迷你图表
+        function drawMiniChart(canvasId, data) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = canvas.offsetHeight;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const max = Math.max(...data);
+            const min = Math.min(...data);
+            const range = max - min || 1;
+
+            ctx.strokeStyle = '#52c41a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            data.forEach((value, index) => {
+                const x = (index / (data.length - 1)) * width;
+                const y = height - ((value - min) / range) * height;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+        }
+
+        // 生成模拟数据
+        const hrData = [70, 71, 72, 73, 72, 71, 72, 73, 72];
+        const spo2Data = [97, 97, 98, 98, 97, 98, 98, 97, 98];
+        const tempData = [24, 24.5, 25, 25.5, 25, 24.8, 25, 25.2, 25];
+        const humiData = [56, 55.5, 55, 54.5, 55, 55.2, 55, 54.8, 55];
+        const gasData = [43, 44, 45, 46, 45, 44.5, 45, 45.5, 45.2];
+
+        drawMiniChart('hrChart', hrData);
+        drawMiniChart('spo2Chart', spo2Data);
+        drawMiniChart('tempChart', tempData);
+        drawMiniChart('humiChart', humiData);
+        drawMiniChart('gasChart', gasData);
+
+        // 更新时间
+        setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = timeStr;
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能安全帽 - 控制台输出</title>
+    <style>
+        body {
+            background: #1e1e1e;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: #d4d4d4;
+            padding: 20px;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .terminal {
+            background: #1e1e1e;
+            border: 2px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .line {
+            margin: 2px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .info { color: #4ec9b0; }
+        .success { color: #4ec9b0; font-weight: bold; }
+        .error { color: #f48771; }
+        .warning { color: #ce9178; }
+        .msh { color: #569cd6; font-weight: bold; }
+        .value { color: #b5cea8; }
+        .label { color: #9cdcfe; }
+        .banner { color: #ce9178; font-weight: bold; }
+        .prompt {
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        .timestamp { color: #858585; font-size: 12px; }
+        .header {
+            text-align: center;
+            color: #ce9178;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="header">
+            <h2 style="margin: 0;">智能安全帽监测系统 - 控制台输出</h2>
+            <p style="margin: 5px 0; font-size: 12px;">STM32H7R7 @ 600MHz | RT-Thread 5.1.0</p>
+        </div>
+
+<div class="line banner"> \ | /</div>
+<div class="line banner">- RT -     Thread Operating System</div>
+<div class="line banner"> / | \     5.1.0 build Jan 15 2025 10:23:15</div>
+<div class="line banner"> 2006 - 2025 Copyright by RT-Thread team</div>
+<div class="line"></div>
+<div class="line info">[I/drv.gpio] GPIO initialized successfully</div>
+<div class="line info">[I/drv.i2c] I2C1 initialized (PB6:SCL, PB7:SDA)</div>
+<div class="line info">[I/drv.uart] UART1 initialized at 115200 bps</div>
+<div class="line info">[I/drv.uart] UART2 initialized at 9600 bps</div>
+<div class="line info">[I/drv.uart] UART3 initialized at 115200 bps</div>
+<div class="line info">[I/drv.adc] ADC1 initialized (16-bit, 3.3V ref)</div>
+<div class="line"></div>
+<div class="line success">========== 传感器初始化 ==========</div>
+<div class="line info">[I/sensor.mpu6050] MPU6050 detected at I2C address 0x68</div>
+<div class="line success">[I/sensor.mpu6050] DMP initialized successfully</div>
+<div class="line info">[I/sensor.max30102] MAX30102 detected at I2C address 0x57</div>
+<div class="line success">[I/sensor.max30102] Heart rate sensor ready</div>
+<div class="line info">[I/sensor.dht11] DHT11 initialized on PA8</div>
+<div class="line success">[I/sensor.dht11] Temperature & Humidity sensor ready</div>
+<div class="line info">[I/sensor.mq2] MQ2 initialized on ADC1_CH0</div>
+<div class="line success">[I/sensor.mq2] Gas sensor calibrated (R0 = 35.9kΩ)</div>
+<div class="line info">[I/sensor.gps] ATGM336H initialized on UART2</div>
+<div class="line success">[I/sensor.gps] GPS module ready</div>
+<div class="line"></div>
+<div class="line success">========== WiFi初始化 ==========</div>
+<div class="line info">[I/wifi.esp01s] ESP-01S reset...</div>
+<div class="line info">[I/wifi.esp01s] Set mode to STA...</div>
+<div class="line success">[I/wifi.esp01s] Connecting to WiFi: SmartHelmet_AP</div>
+<div class="line success">[I/wifi.esp01s] WiFi connected! IP: 192.168.1.100</div>
+<div class="line info">[I/mqtt] Configuring MQTT client...</div>
+<div class="line success">[I/mqtt] Connected to Huawei IoT Cloud (a1aXXXXXXXX.iot-mqtts.cn-north-4.myhuaweicloud.com:1883)</div>
+<div class="line"></div>
+<div class="line success">========== 语音模块初始化 ==========</div>
+<div class="line info">[I/asr] ASRpro initialized on UART1</div>
+<div class="line success">[I/asr] Voice recognition ready</div>
+<div class="line"></div>
+<div class="line success">========== 任务调度器启动 ==========</div>
+<div class="line info">[I/scheduler] Total tasks: 9</div>
+<div class="line info">[I/scheduler] Task list:</div>
+<div class="line">  <span class="label">- mpu6050_task</span>      <span class="value">(100ms)</span></div>
+<div class="line">  <span class="label">- mq2_task</span>          <span class="value">(100ms)</span></div>
+<div class="line">  <span class="label">- dht11_task</span>        <span class="value">(100ms)</span></div>
+<div class="line">  <span class="label">- max30102_task</span>     <span class="value">(200ms)</span></div>
+<div class="line">  <span class="label">- atgm336h_task</span>     <span class="value">(100ms)</span></div>
+<div class="line">  <span class="label">- send_flag_to_asr</span>  <span class="value">(1000ms)</span></div>
+<div class="line">  <span class="label">- process_asr_data</span>  <span class="value">(20ms)</span></div>
+<div class="line">  <span class="label">- esp_report1</span>       <span class="value">(350ms)</span></div>
+<div class="line">  <span class="label">- esp_report2</span>       <span class="value">(1000ms)</span></div>
+<div class="line success">[I/scheduler] Scheduler started</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt;</div>
+<div class="line"></div>
+<div class="line timestamp">[00:01.234] </div><div class="line info">[I/sensor] MPU6050: Pitch=<span class="value">0.5°</span>, Roll=<span class="value">-1.2°</span>, Yaw=<span class="value">45.8°</span></div>
+<div class="line timestamp">[00:01.334] </div><div class="line info">[I/sensor] MQ2: PPM=<span class="value">45.2</span>, Status=<span class="success">Safe</span></div>
+<div class="line timestamp">[00:01.434] </div><div class="line info">[I/sensor] DHT11: Temp=<span class="value">25°C</span>, Humidity=<span class="value">55%</span></div>
+<div class="line timestamp">[00:01.634] </div><div class="line info">[I/sensor] MAX30102: HR=<span class="value">72</span>bpm, SpO2=<span class="value">98%</span>, Status=<span class="success">Normal</span></div>
+<div class="line timestamp">[00:01.734] </div><div class="line info">[I/sensor] GPS: Lon=<span class="value">114.3579°</span>, Lat=<span class="value">30.5447°</span>, Fix=<span class="success">Yes</span></div>
+<div class="line timestamp">[00:02.084] </div><div class="line success">[I/mqtt] Published BasicData: {spO2:98, density:45.2, heart_rate:72, fall_flag:0, collision_flag:0}</div>
+<div class="line timestamp">[00:03.000] </div><div class="line success">[I/mqtt] Published BasicData: {longitude:114.36, latitude:30.54, temperature:25, humidity:55}</div>
+<div class="line"></div>
+<div class="line timestamp">[00:05.234] </div><div class="line info">[I/sensor] MPU6050: Pitch=<span class="value">0.3°</span>, Roll=<span class="value">-0.9°</span>, Yaw=<span class="value">46.2°</span></div>
+<div class="line timestamp">[00:05.334] </div><div class="line info">[I/sensor] MQ2: PPM=<span class="value">43.8</span>, Status=<span class="success">Safe</span></div>
+<div class="line timestamp">[00:05.634] </div><div class="line info">[I/sensor] MAX30102: HR=<span class="value">74</span>bpm, SpO2=<span class="value">97%</span>, Status=<span class="success">Normal</span></div>
+<div class="line"></div>
+<div class="line timestamp">[00:10.456] </div><div class="line warning">[W/sensor] MAX30102: Heart rate out of range! HR=<span class="error">105</span>bpm</div>
+<div class="line timestamp">[00:10.456] </div><div class="line warning">[W/asr] Sending alert: heartrate</div>
+<div class="line success">[I/mqtt] Published alert event: heartrate_abnormal</div>
+<div class="line"></div>
+<div class="line timestamp">[00:15.678] </div><div class="line warning">[W/sensor] MQ2: Gas concentration high! PPM=<span class="error">112.5</span></div>
+<div class="line timestamp">[00:15.678] </div><div class="line warning">[W/asr] Sending alert: density</div>
+<div class="line error">[E/safety] Hazardous gas detected! PPM=112.5 (threshold=100)</div>
+<div class="line success">[I/mqtt] Published alert event: gas_density_high</div>
+<div class="line"></div>
+<div class="line timestamp">[00:16.890] </div><div class="line info">[I/asr] Voice command received: <span class="value">"good"</span></div>
+<div class="line success">[I/asr] Alarm cancelled for 10 seconds</div>
+<div class="line"></div>
+<div class="line timestamp">[00:25.123] </div><div class="line error">[E/safety] FALL DETECTED! AVM=<span class="error">32456</span>, GVM=<span class="error">12345</span></div>
+<div class="line warning">[W/asr] Sending alert: fall</div>
+<div class="line error">[E/mqtt] EMERGENCY: Fall detected at (114.3580°, 30.5448°)</div>
+<div class="line success">[I/mqtt] Published emergency event: fall_detected</div>
+<div class="line"></div>
+<div class="line timestamp">[00:26.456] </div><div class="line info">[I/asr] Voice command received: <span class="value">"good"</span></div>
+<div class="line success">[I/asr] Fall alarm cancelled</div>
+<div class="line"></div>
+<div class="line timestamp">[00:30.234] </div><div class="line info">[I/sensor] MPU6050: Pitch=<span class="value">0.8°</span>, Roll=<span class="value">-1.5°</span>, Yaw=<span class="value">47.1°</span></div>
+<div class="line timestamp">[00:30.334] </div><div class="line info">[I/sensor] MQ2: PPM=<span class="value">46.1</span>, Status=<span class="success">Safe</span></div>
+<div class="line timestamp">[00:30.434] </div><div class="line info">[I/sensor] DHT11: Temp=<span class="value">26°C</span>, Humidity=<span class="value">54%</span></div>
+<div class="line timestamp">[00:30.634] </div><div class="line info">[I/sensor] MAX30102: HR=<span class="value">73</span>bpm, SpO2=<span class="value">98%</span>, Status=<span class="success">Normal</span></div>
+<div class="line timestamp">[00:30.734] </div><div class="line info">[I/sensor] GPS: Lon=<span class="value">114.3581°</span>, Lat=<span class="value">30.5449°</span>, Fix=<span class="success">Yes</span></div>
+<div class="line timestamp">[00:31.084] </div><div class="line success">[I/mqtt] Published BasicData: {spO2:98, density:46.1, heart_rate:73, fall_flag:0, collision_flag:0}</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt; <span class="prompt">list_thread</span></div>
+<div class="line">thread   pri  status      sp     stack size max used left tick  error</div>
+<div class="line">-------- ---  ------- ---------- ----------  ------  ---------- ---</div>
+<div class="line">tshell    20  running 0x00000158 0x00001000    21%   0x00000003 000</div>
+<div class="line">tidle0    31  ready   0x00000070 0x00000400    28%   0x0000000a 000</div>
+<div class="line">main      10  suspend 0x00000108 0x00000800    20%   0x00000014 000</div>
+<div class="line">mpu6050   12  suspend 0x000001a8 0x00000800    32%   0x00000005 000</div>
+<div class="line">max30102  13  suspend 0x000001e0 0x00000800    36%   0x00000008 000</div>
+<div class="line">dht11     14  suspend 0x00000098 0x00000400    23%   0x00000005 000</div>
+<div class="line">mq2       14  suspend 0x000000b0 0x00000400    27%   0x00000005 000</div>
+<div class="line">gps       15  suspend 0x000001c8 0x00000600    47%   0x00000005 000</div>
+<div class="line">wifi      16  suspend 0x00000188 0x00000800    30%   0x00000014 000</div>
+<div class="line">mqtt      16  suspend 0x000001b8 0x00000800    35%   0x00000014 000</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt; <span class="prompt">free</span></div>
+<div class="line">total    : 655360 Bytes</div>
+<div class="line">used     : 46128 Bytes</div>
+<div class="line">maximum  : 48256 Bytes</div>
+<div class="line">available: 609232 Bytes</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt; <span class="prompt">sensor_list</span></div>
+<div class="line">sensor                 type    vendor    unit      intf   range      period</div>
+<div class="line">--------------------- ------- --------- --------- ------ --------- ---------</div>
+<div class="line">mpu6050_accel         Accel   InvenSen  m/s^2     i2c    ±2g       100ms</div>
+<div class="line">mpu6050_gyro          Gyro    InvenSen  rad/s     i2c    ±2000°/s  100ms</div>
+<div class="line">max30102_hr           Hrate   Maxim     bpm       i2c    0-200     200ms</div>
+<div class="line">max30102_spo2         SpO2    Maxim     %         i2c    0-100     200ms</div>
+<div class="line">dht11_temp            Temp    DHT       °C        gpio   0-50      100ms</div>
+<div class="line">dht11_humi            Humi    DHT       %         gpio   20-90     100ms</div>
+<div class="line">mq2_gas               Gas     Hanwei    ppm       adc    0-1000    100ms</div>
+<div class="line">atgm336h_gps          GPS     ATGM      deg       uart   Global    100ms</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt; <span class="prompt">sensor_read mpu6050_accel</span></div>
+<div class="line">[00:45.123] Accel: X=<span class="value">-0.02</span> Y=<span class="value">0.05</span> Z=<span class="value">9.81</span> m/s^2</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt; <span class="prompt">sensor_read max30102_hr</span></div>
+<div class="line">[00:46.234] Heart Rate: <span class="value">72</span> bpm</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt; <span class="prompt">ps</span></div>
+<div class="line success">System uptime: 00:00:50</div>
+<div class="line info">CPU usage: 12%</div>
+<div class="line info">Free memory: 595KB / 640KB (93%)</div>
+<div class="line"></div>
+<div class="line msh">msh /&gt;</div>
+<div class="line"></div>
+<div class="line success">========== 系统运行正常 ==========</div>
+<div class="line info">所有传感器工作正常</div>
+<div class="line info">WiFi连接稳定</div>
+<div class="line info">MQTT数据上报正常</div>
+<div class="line success">智能安全帽监测系统运行中...</div>
+
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; color: #858585; font-size: 12px;">
+        <p>截图说明: 按 F11 全屏后截图效果更佳</p>
+        <p>建议使用: Win + Shift + S 或 微信截图(Alt + A)</p>
+    </div>
+</body>
+</html>

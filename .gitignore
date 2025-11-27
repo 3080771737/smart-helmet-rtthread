@@ -1,0 +1,62 @@
+*.log
+*.tmp
+*.temp
+*.swp
+*.bak
+*.old
+
+# 编译产物
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.axf
+*.lst
+*.lnp
+*.dep
+*.crf
+
+# Keil MDK
+*.uvguix.*
+*.uvoptx
+*.uvprojx
+*.scvd
+*.iex
+*.htm
+JLinkLog.txt
+*.tra
+
+# SCons
+.sconsign.dblite
+*.pyc
+
+# 构建目录
+build/
+Debug/
+Release/
+obj/
+output/
+
+# RT-Thread
+rtthread.bin
+rtthread.elf
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 大文件(GitHub限制100MB)
+*.iso
+*.img
+
+# 敏感信息
+config_private.h
+secrets.h
