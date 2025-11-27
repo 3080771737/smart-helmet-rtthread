@@ -150,6 +150,12 @@ echo [提示] 如果是第一次推送，可能需要登录GitHub进行授权
 echo.
 
 git branch -M main >nul 2>&1
+
+REM 先尝试拉取远程内容(如果远程有README等文件)
+echo [信息] 正在同步远程仓库...
+git pull origin main --allow-unrelated-histories --no-edit >nul 2>&1
+
+REM 推送到GitHub
 git push -u origin main
 
 if %errorlevel% equ 0 (
