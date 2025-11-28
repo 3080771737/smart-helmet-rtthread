@@ -172,8 +172,6 @@ INIT_APP_EXPORT(sensor_threads_init);
 
 ## 🔌 硬件框架
 
-![3c3f1513c1eb85b39430a689c37ed056](./smart_helmet_rtthread_submission.assets/3c3f1513c1eb85b39430a689c37ed056.jpg
-
 ### 主控平台
 
 | 组件 | 型号/参数 | 说明 |
@@ -193,10 +191,6 @@ INIT_APP_EXPORT(sensor_threads_init);
 | ATGM336H | UART2 | PA2(TX), PA3(RX) | gps | GPS定位 |
 | ESP-01S | UART3 | PB10(TX), PB11(RX) | wifi | WiFi通信 |
 | LED | GPIO | PO5 | led | 状态指示 |
-
-### **硬件连接图**
-
-![3c3f1513c1eb85b39430a689c37ed056](./smart_helmet_rtthread_submission.assets/3c3f1513c1eb85b39430a689c37ed056-1764248217131-24.jpg)
 
 ---
 
@@ -381,7 +375,173 @@ static void mpu6050_thread_entry(void *parameter) {
 - 滑动窗口平均滤波
 - 异常检测和日志记录
 
-### 4. WiFi数据上报线程
+**线程代码**:
+
+```c
+static void max30102_thread_entry(void *parameter) {
+    rt_int32_t heart_rate = 0, spo2 = 0;
+    rt_uint8_t valid_hr = 0, valid_spo2 = 0;
+
+    LOG_I("MAX30102 thread started");
+
+    while (1) {
+        /* 读取PPG数据并计算心率血氧 */
+        // maxim_heart_rate_and_oxygen_saturation(...);
+
+        /* 滑动窗口平均滤波 */
+        if (valid_hr && valid_spo2) {
+            rt_mutex_take(sensor_mutex, RT_WAITING_FOREVER);
+            g_sensor_data.heart_rate = heart_rate;
+            g_sensor_data.spo2 = spo2;
+            g_sensor_data.hr_valid = RT_TRUE;
+
+            /* 异常告警检测 */
+            if (heart_rate > 120 || heart_rate < 50) {
+                LOG_W("Abnormal heart rate: %d bpm", heart_rate);
+            }
+            if (spo2 < 90) {
+                LOG_W("Low SpO2: %d%%", spo2);
+            }
+            rt_mutex_release(sensor_mutex);
+        }
+
+        rt_thread_mdelay(200);
+    }
+}
+```
+
+### 4. DHT11温湿度线程
+
+**线程名**: `dht11`
+**优先级**: 17
+**周期**: 1000ms
+
+**功能**:
+- 单总线协议读取DHT11数据
+- 温度范围: 0-50°C，精度±2°C
+- 湿度范围: 20-90%RH，精度±5%
+- 数据校验和验证
+
+**线程代码**:
+
+```c
+static void dht11_thread_entry(void *parameter) {
+    rt_uint8_t temp = 0, humi = 0;
+
+    LOG_I("DHT11 thread started");
+
+    while (1) {
+        /* 读取DHT11温湿度数据 */
+        if (dht11_read_data(&temp, &humi) == RT_EOK) {
+            rt_mutex_take(sensor_mutex, RT_WAITING_FOREVER);
+            g_sensor_data.temperature = temp;
+            g_sensor_data.humidity = humi;
+            rt_mutex_release(sensor_mutex);
+
+            LOG_D("Temperature: %d°C, Humidity: %d%%", temp, humi);
+        } else {
+            LOG_E("DHT11 read failed");
+        }
+
+        rt_thread_mdelay(1000);
+    }
+}
+```
+
+### 5. MQ2气体传感器线程
+
+**线程名**: `mq2`
+**优先级**: 17
+**周期**: 100ms
+
+**功能**:
+- ADC采集MQ2模拟量输出
+- 多次采样求平均值(10次)
+- 转换为ppm浓度值
+- 超过100ppm触发报警
+
+**线程代码**:
+
+```c
+static void mq2_thread_entry(void *parameter) {
+    rt_uint32_t adc_value = 0;
+    rt_uint16_t gas_ppm = 0;
+
+    LOG_I("MQ2 thread started");
+
+    while (1) {
+        /* 多次采样平均 */
+        adc_value = 0;
+        for (int i = 0; i < 10; i++) {
+            adc_value += adc_read_channel(0);  // PA0
+            rt_thread_mdelay(10);
+        }
+        adc_value /= 10;
+
+        /* 转换为ppm */
+        gas_ppm = adc_to_ppm(adc_value);
+
+        rt_mutex_take(sensor_mutex, RT_WAITING_FOREVER);
+        g_sensor_data.gas_ppm = gas_ppm;
+
+        /* 气体报警 */
+        if (gas_ppm > 100) {
+            g_sensor_data.gas_alarm = RT_TRUE;
+            LOG_W("Gas concentration alarm: %d ppm", gas_ppm);
+        } else {
+            g_sensor_data.gas_alarm = RT_FALSE;
+        }
+        rt_mutex_release(sensor_mutex);
+
+        rt_thread_mdelay(100);
+    }
+}
+```
+
+### 6. GPS定位线程
+
+**线程名**: `gps`
+**优先级**: 18
+**周期**: 1000ms
+
+**功能**:
+- UART接收NMEA 0183格式数据
+- 解析$GPGGA/$GPRMC语句
+- 提取经纬度、时间、卫星数
+- 判断定位有效性
+
+**线程代码**:
+
+```c
+static void gps_thread_entry(void *parameter) {
+    char nmea_buffer[128];
+    float longitude = 0.0f, latitude = 0.0f;
+    rt_uint8_t gps_valid = 0;
+
+    LOG_I("GPS thread started");
+
+    while (1) {
+        /* 读取UART数据 */
+        if (uart_read_line(UART2, nmea_buffer, sizeof(nmea_buffer)) > 0) {
+            /* 解析NMEA数据 */
+            if (parse_gpgga(nmea_buffer, &latitude, &longitude, &gps_valid)) {
+                rt_mutex_take(sensor_mutex, RT_WAITING_FOREVER);
+                g_sensor_data.longitude = longitude;
+                g_sensor_data.latitude = latitude;
+                g_sensor_data.gps_valid = gps_valid;
+                rt_mutex_release(sensor_mutex);
+
+                LOG_D("GPS: Lon=%.6f, Lat=%.6f, Valid=%d",
+                      longitude, latitude, gps_valid);
+            }
+        }
+
+        rt_thread_mdelay(1000);
+    }
+}
+```
+
+### 7. WiFi数据上报线程
 
 **线程名**: `wifi`
 **优先级**: 19
@@ -594,8 +754,7 @@ Apache-2.0
 
 ## 🙏 致谢
 
-- **RT-Thread团队**: 提供优秀的国产RTOS
-- **正点原子**: 提供ART-Pi2开发板
+- **RT-Thread团队**: 提供优秀的国产RTOS， 提供ART-Pi2开发板
 - **STMicroelectronics**: 提供STM32 HAL库
 
 ---
@@ -604,7 +763,7 @@ Apache-2.0
 
 - **作者**: 陈思宇
 - **邮箱**: 3080771737@qq.com
-- **GitHub**:[3080771737/smart-helmet-rtthread: 基于RT-Thread的智能安全帽多传感器监测系统](https://github.com/3080771737/smart-helmet-rtthread)
+- **GitHub**:[3080771737/smart-helmet-rtthread: 基于RT-Thread的智能安全帽多传感器监测系统](https://github.com/3080771737/smart-helmet-rtthread) 
 - **RT-Thread社区**: https://club.rt-thread.org
 
 ---
