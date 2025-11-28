@@ -252,8 +252,8 @@ scons --target=mdk5
 
 ## 📧 联系方式
 
-- **作者**: [您的名字]
-- **邮箱**: your_email@example.com
+- **作者**: 陈思宇
+- **邮箱**: 3080771737@qq.com
 - **GitHub**: [@3080771737](https://github.com/3080771737)
 - **RT-Thread社区**: [club.rt-thread.org](https://club.rt-thread.org)
 
